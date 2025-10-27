@@ -1,0 +1,14 @@
+.product-page {
+  padding: 40px;
+  text-align: center;
+}
+
+.product-page h1 {
+  font-size: 2rem;
+  margin-bottom: 10px;
+}
+
+.product-page a {
+  color: #ffb347;
+  text-decoration: none;
+}
