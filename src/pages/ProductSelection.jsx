@@ -1,8 +1,7 @@
 import React, { useState } from "react";
-import "./ProductSelection.css"; // We'll style it next
+import "./ProductSelection.css";
 
 export default function ProductSelection() {
-  // Room types
   const rooms = [
     { name: "Auditorium Hall", capacity: 200, price: 5500 },
     { name: "Conference Room", capacity: 15, price: 3500 },
@@ -11,57 +10,107 @@ export default function ProductSelection() {
     { name: "Small Meeting Room", capacity: 5, price: 1100 },
   ];
 
-  // State for room quantities
+  const addons = [
+    { name: "Speakers", price: 35 },
+    { name: "Microphones", price: 45 },
+    { name: "Whiteboards", price: 80 },
+    { name: "Projectors", price: 200 },
+    { name: "Signage", price: 80 },
+  ];
+
+  const [activeTab, setActiveTab] = useState("venue");
   const [roomCounts, setRoomCounts] = useState(
-    rooms.reduce((acc, room) => ({ ...acc, [room.name]: 0 }), {})
+    rooms.reduce((acc, r) => ({ ...acc, [r.name]: 0 }), {})
+  );
+  const [addonCounts, setAddonCounts] = useState(
+    addons.reduce((acc, a) => ({ ...acc, [a.name]: 0 }), {})
   );
 
-  // Increment/decrement handlers
-  const increment = (roomName) => {
-    setRoomCounts({ ...roomCounts, [roomName]: roomCounts[roomName] + 1 });
-  };
+  // use functional updates to avoid stale state
+  const increment = (setter, key) =>
+    setter(prev => ({ ...prev, [key]: (prev[key] || 0) + 1 }));
 
-  const decrement = (roomName) => {
-    setRoomCounts({
-      ...roomCounts,
-      [roomName]: Math.max(0, roomCounts[roomName] - 1),
-    });
-  };
+  const decrement = (setter, key) =>
+    setter(prev => ({ ...prev, [key]: Math.max(0, (prev[key] || 0) - 1) }));
 
   return (
     <div className="product-page">
-      {/* Navigation Header */}
       <header className="product-header">
-        <div className="logo">
+        <div className="header-left">
           <h1>Conference Expense Planner</h1>
         </div>
-        <div className="nav-buttons">
-          <button>Venue</button>
-          <button>Add-ons</button>
-          <button>Meals</button>
-          <button className="show-details">Show Details</button>
-        </div>
+
+        <nav className="header-right">
+          <button
+            className={activeTab === "venue" ? "tab-btn active" : "tab-btn"}
+            onClick={() => setActiveTab("venue")}
+          >
+            Venue
+          </button>
+
+          <button
+            className={activeTab === "addons" ? "tab-btn active" : "tab-btn"}
+            onClick={() => setActiveTab("addons")}
+          >
+            Add-ons
+          </button>
+
+          <button
+            className={activeTab === "meals" ? "tab-btn active" : "tab-btn"}
+            onClick={() => setActiveTab("meals")}
+          >
+            Meals
+          </button>
+
+          <button className="tab-btn details" onClick={() => alert("Show details (coming soon)")} >
+            Show Details
+          </button>
+        </nav>
       </header>
 
-      {/* Rooms Section */}
-      <section className="rooms-section">
-        <h2>Rooms</h2>
-        {rooms.map((room) => (
-          <div key={room.name} className="room-item">
-            <div className="room-info">
-              <p>
-                <strong>{room.name}</strong> - Capacity: {room.capacity} - $
-                {room.price}
-              </p>
+      {/* TABS: each has class tab-section; only the active one has .active (display:block) */}
+      <main className="tabs-container">
+        <section className={`tab-section ${activeTab === "venue" ? "active" : ""}`}>
+          <h2>Venue Room Selection</h2>
+          {rooms.map(r => (
+            <div key={r.name} className="item-row">
+              <div className="item-info">
+                <strong>{r.name}</strong>
+                <div className="meta">Capacity: {r.capacity} • ${r.price}</div>
+              </div>
+
+              <div className="item-controls">
+                <button onClick={() => decrement(setRoomCounts, r.name)}>-</button>
+                <span className="count">{roomCounts[r.name] || 0}</span>
+                <button onClick={() => increment(setRoomCounts, r.name)}>+</button>
+              </div>
             </div>
-            <div className="room-controls">
-              <button onClick={() => decrement(room.name)}>-</button>
-              <span>{roomCounts[room.name]}</span>
-              <button onClick={() => increment(room.name)}>+</button>
+          ))}
+        </section>
+
+        <section className={`tab-section ${activeTab === "addons" ? "active" : ""}`}>
+          <h2>Audio/Visual Add-ons</h2>
+          {addons.map(a => (
+            <div key={a.name} className="item-row">
+              <div className="item-info">
+                <strong>{a.name}</strong>
+                <div className="meta">${a.price}</div>
+              </div>
+
+              <div className="item-controls">
+                <button onClick={() => decrement(setAddonCounts, a.name)}>-</button>
+                <span className="count">{addonCounts[a.name] || 0}</span>
+                <button onClick={() => increment(setAddonCounts, a.name)}>+</button>
+              </div>
             </div>
-          </div>
-        ))}
-      </section>
+          ))}
+        </section>
+
+        <section className={`tab-section ${activeTab === "meals" ? "active" : ""}`}>
+          <h2>Meals</h2>
+          <p>Meal controls will go here (per-person inputs). We can add this next.</p>
+        </section>
+      </main>
     </div>
   );
 }
